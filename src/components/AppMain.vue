@@ -1,11 +1,11 @@
 <script>
 import axios from 'axios';
-
+import { state } from '../state';
 export default {
   name: 'AppMain',
   data() {
     return {
-      cards: [],
+      state,
       archetypes: [],
       selectedArchetype: '',
     };
@@ -13,41 +13,31 @@ export default {
   methods: {
     filterResults() {
       console.log('filter all cards');
-      const url = `https://db.ygoprodeck.com/api/v7/cardinfo.php?num=20&offset=0&archetype=${this.selectedArchetype}`
-
+      const url = `${state.api_url}&archetype=${this.selectedArchetype}`
       console.log(url);
+      state.fetchData(url);
+
+    },
+
+    getArchetypesList(url) {
       axios.get(url)
         .then(response => {
-          console.log(response.data.data);
-          this.cards = response.data.data;
+          console.log(response.data);
+          this.archetypes = response.data;
         })
         .catch(error => {
-          console.error(error);
-        });
-
+          console.log(error);
+        })
     }
+
   },
   mounted() {
 
     /* Get all archetypes */
-    axios.get('https://db.ygoprodeck.com/api/v7/archetypes.php')
-      .then(response => {
-        console.log(response.data);
-        this.archetypes = response.data;
-      })
-      .catch(error => {
-        console.log(error);
-      })
-
+    this.getArchetypesList('https://db.ygoprodeck.com/api/v7/archetypes.php');
     /* Get all Cards */
-    axios.get('https://db.ygoprodeck.com/api/v7/cardinfo.php?num=20&offset=0')
-      .then(response => {
-        console.log(response.data.data);
-        this.cards = response.data.data;
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    state.fetchData(state.api_url);
+
   },
 }
 </script>
@@ -71,7 +61,7 @@ export default {
     <section class="cards">
       <div class="container">
         <div class="row">
-          <div class="col" v-for="card in cards">
+          <div class="col" v-for="card in state.cards">
             <div class="card">
               <img :src="card.card_images[0].image_url">
               <h3>{{ card.name }}</h3>
