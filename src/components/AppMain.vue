@@ -1,44 +1,34 @@
 <script>
 import axios from 'axios';
 import { state } from '../state';
+import ArchetypesFilter from './ArchetypesFilter.vue';
 export default {
   name: 'AppMain',
   data() {
     return {
       state,
-      archetypes: [],
-      selectedArchetype: '',
     };
   },
   methods: {
     filterResults() {
       console.log('filter all cards');
-      const url = `${state.api_url}&archetype=${this.selectedArchetype}`
+      let url;
       console.log(url);
+      if (state.selectedArchetype === '') {
+        url = state.api_url;
+      } else {
+        url = `${state.api_url}&archetype=${state.selectedArchetype}`;
+      }
       state.fetchData(url);
-
     },
-
-    getArchetypesList(url) {
-      axios.get(url)
-        .then(response => {
-          console.log(response.data);
-          this.archetypes = response.data;
-        })
-        .catch(error => {
-          console.log(error);
-        })
-    }
-
   },
   mounted() {
-
     /* Get all archetypes */
-    this.getArchetypesList('https://db.ygoprodeck.com/api/v7/archetypes.php');
+    //this.getArchetypesList('https://db.ygoprodeck.com/api/v7/archetypes.php');
     /* Get all Cards */
     state.fetchData(state.api_url);
-
   },
+  components: { ArchetypesFilter }
 }
 </script>
 <template>
@@ -46,14 +36,7 @@ export default {
     MAIN Content
 
     <!-- filter  -->
-    <select name="archetype" id="archetype" v-model="selectedArchetype" @change="filterResults">
-      <option value="">All</option>
-      <!-- all archetypes here -->
-      <option :value="archetype.archetype_name" v-for="archetype in archetypes">
-        {{ archetype.archetype_name }}
-      </option>
-    </select>
-
+    <ArchetypesFilter @filter="filterResults"></ArchetypesFilter>
     <!-- total results -->
 
     <!-- cards list -->
